@@ -1,29 +1,92 @@
 aid: theholisticcare
 name: The Holistic Care — THC Open Mindfulness API
-description: 'The Holistic Care — THC Open Mindfulness API is a company surfaced via the API Evangelist
-  harvest backlog (source: new-submission) and added to the network as a stub for full-pipeline profiling.'
+description: 'The THC Open Mindfulness Resources API, provided by The Holistic Care, offers a free, public, read‑only REST API delivering structured mindfulness resources. It includes research citations, a glossary, 16 mindfulness games, 111 guided audio practices, and excerpts from 527 blog posts. The API requires no authentication, API key, or cost, and supports searching and browsing across all resource families via the /v1/resources and /v1/search endpoints.'
 url: https://raw.githubusercontent.com/api-evangelist/theholisticcare/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:new-submission
-x-tier: stub
-x-tier-reason: harvest
+x-tier: profiled
+x-tier-reason: enrichment pass 2026-09-28 (modular-v1; was harvest)
 specificationVersion: '0.20'
 created: '2026-09-28'
 modified: '2026-09-28'
 tags:
-- Company
-apis: []
+- Mindfulness
+- Education
+- Health
+- OpenAPI
+- PublicAPI
+- Free
+apis:
+- name: THC Open Mindfulness Resources API
+  description: >-
+    A free, public, read‑only REST API exposing structured mindfulness resources such as research citations,
+    glossary, games, audio practices, and blog excerpts.
+  humanURL: https://api.theholisticcare.com/docs
+  baseURL: https://api.theholisticcare.com
+  openAPI:
+    url: openapi/theholisticcare-openapi.yaml
+    type: OpenAPI
+- aid: theholisticcare:theholisticcare-health-api
+  name: The Holistic Care — THC Open Mindfulness API Health API
+  description: >-
+    The Health API from The Holistic Care — THC Open Mindfulness API — 1 operation(s) for health.
+  humanURL: https://api.theholisticcare.com/docs
+  tags:
+  - Health
+  properties:
+  - type: OpenAPI
+    url: openapi/theholisticcare-health-api-openapi.yml
+- aid: theholisticcare:theholisticcare-resources-api
+  name: The Holistic Care — THC Open Mindfulness API Resources API
+  description: >-
+    The Resources API from The Holistic Care — THC Open Mindfulness API — 1 operation(s) for resources.
+  humanURL: https://api.theholisticcare.com/docs
+  tags:
+  - Resources
+  properties:
+  - type: OpenAPI
+    url: openapi/theholisticcare-resources-api-openapi.yml
+- aid: theholisticcare:theholisticcare-search-api
+  name: The Holistic Care — THC Open Mindfulness API Search API
+  description: >-
+    The Search API from The Holistic Care — THC Open Mindfulness API — 1 operation(s) for search.
+  humanURL: https://api.theholisticcare.com/docs
+  tags:
+  - Search
+  properties:
+  - type: OpenAPI
+    url: openapi/theholisticcare-search-api-openapi.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: DomainSecurity
+  url: security/theholisticcare-domain-security.yml
 - type: Website
   url: https://api.theholisticcare.com/
 - type: Documentation
   url: https://api.theholisticcare.com/docs
+- type: Blog
+  url: https://www.theholisticcare.com/blog
+- type: Support
+  url: https://www.theholisticcare.com/contact
+- type: TermsOfService
+  url: https://www.theholisticcare.com/terms-of-use
+- type: PrivacyPolicy
+  url: https://www.theholisticcare.com/privacy-policy
+- type: SignUp
+  url: https://www.theholisticcare.com/signup
+- type: Login
+  url: https://www.theholisticcare.com/login
 x-submission-notes: Official public read-only REST API, no auth/key/cost; apis.json at /apis.json, OpenAPI
   /openapi/openapi.yaml, llms.txt.
 x-submission-probe: '2026-09-28: root 200, invented 404, llms 200, apis.json 200, openapi 200, docs 200'
 x-submitted-by: mohan@theholisticcare.com (apis.io/add, 2026-09-28)
+x-enrichment:
+  date: '2026-09-28'
+  status: enriched
+  artifacts_added: 15
+  pass: modular-v1
+  engine: identity=local,contract=local,surfaces=local,docs=local,regulatory=local

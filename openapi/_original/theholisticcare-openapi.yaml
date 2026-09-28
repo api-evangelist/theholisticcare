@@ -1,0 +1,61 @@
+# x-archived-from: theholisticcare-openapi.yaml
+# x-archived-on: 2026-09-28
+openapi: 3.0.3
+info:
+  title: THC Open Mindfulness Resources API
+  version: "1.0.0"
+  description: >
+    A free, public, read-only REST API exposing The Holistic Care's open
+    mindfulness resources — research citations (whitepapers), a
+    plain-language glossary, 16 free mindfulness games, 111 free
+    guided-audio practices, blog post excerpts, and the public PanchaVikas
+    early-years framework — as structured JSON. No authentication required.
+    A unified `/v1/resources` browse endpoint and a `/v1/search` endpoint
+    aggregate across every family at once. Blog endpoints expose
+    metadata/excerpts only — full article content remains on the canonical
+    The Holistic Care website. See `/docs` for a fair-use/attribution note
+    and a versioning policy alongside this reference.
+
+
+    Licensing note: this OpenAPI spec and the repository's code are MIT
+    licensed (see the `license` field below and `LICENSE` in the repo). The
+    *content* this API returns (research summaries, glossary entries, game
+    descriptions, guided-practice metadata, blog excerpts, PanchaVikas
+    materials) is NOT covered by that MIT license — it remains Copyright ©
+    The Holistic Care, all rights reserved, unless a specific resource states
+    otherwise. See `LICENSING.md` in the repository for the full breakdown of
+    software license vs. API access terms vs. content rights vs. attribution.
+  contact:
+    name: The Holistic Care
+    url: https://www.theholisticcare.com
+    email: mohan@theholisticcare.com
+  license:
+    name: MIT (code only — see LICENSING.md for content rights)
+    url: https://github.com/mohanagc/thc-open-mindfulness-api/blob/main/LICENSE
+servers:
+  - url: https://api.theholisticcare.com
+    description: Production (only environment currently deployed)
+paths:
+  /health:
+    get:
+      responses:
+        '200':
+          description: OK
+  /v1/resources:
+    get:
+      summary: Browse resources
+      responses:
+        '200':
+          description: List of resources
+  /v1/search:
+    get:
+      summary: Search resources
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Search query
+      responses:
+        '200':
+          description: Search results

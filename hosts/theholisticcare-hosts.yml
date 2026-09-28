@@ -1,0 +1,54 @@
+generated: '2026-09-28'
+method: derived
+source: the pre-flight dossier, apis.yml pointers, spec servers, well-known, vendors -- nothing fetched here
+generator: derive-hosts.py
+summary:
+  hosts: 2
+  own: 2
+  other_domain: 0
+  platform: 0
+  roles:
+  - identity
+  - website
+hosts:
+- host: api.theholisticcare.com
+  found_by:
+  - pointer
+  - apis[]
+  - probed
+  - docs-index
+  - spec-found
+  - contract-discovery
+  - well-known
+  - vendor-detect
+  types:
+  - Website
+  - Documentation
+  serves:
+  - api
+  - docs
+  - spec
+  - hosting
+  vendor: vercel
+  registrable_domain: theholisticcare.com
+  role: website
+  relation: own
+- host: www.theholisticcare.com
+  found_by:
+  - pointer
+  - probed
+  - docs-index
+  - contract-discovery
+  - well-known
+  types:
+  - Blog
+  - Support
+  - TermsOfService
+  - PrivacyPolicy
+  - SignUp
+  - Login
+  serves:
+  - docs
+  registrable_domain: theholisticcare.com
+  role: identity
+  relation: own

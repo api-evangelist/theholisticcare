@@ -1,0 +1,29 @@
+openapi: 3.2.0
+info:
+  title: THC Open Mindfulness Resources Health API
+  version: 1.0.0
+  description: A free, public, read-only REST API exposing The Holistic Care's open mindfulness resources — research citations (whitepapers), a plain-language glossary, 16 free mindfulness games, 111 free guided-audio practices, blog post excerpts, and the public PanchaVikas early-years framework — as structured JSON.
+  contact:
+    name: The Holistic Care
+    url: https://www.theholisticcare.com
+    email: mohan@theholisticcare.com
+  license:
+    name: MIT (code only — see LICENSING.md for content rights)
+    url: https://github.com/mohanagc/thc-open-mindfulness-api/blob/main/LICENSE
+servers:
+- url: https://api.theholisticcare.com
+  description: Production (only environment currently deployed)
+tags:
+- name: Health
+paths:
+  /health:
+    get:
+      responses:
+        '200':
+          description: OK
+      tags:
+      - Health
+      summary: Get health
+      x-summary-source: derived
+      operationId: getHealth
+      x-operation-id-source: derived

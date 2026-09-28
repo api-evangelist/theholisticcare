@@ -1,0 +1,11 @@
+generated: '2026-09-28'
+method: searched
+source: https://api.theholisticcare.com/docs
+name: The Holistic Care API
+limits:
+  - name: General
+    scope: per-ip
+    window: minute
+    max: 60
+    limit_text: "~60 requests/minute per IP address"
+    description: "Requests are throttled to a best-effort ~60 requests/minute per IP address, returning 429 when exceeded."

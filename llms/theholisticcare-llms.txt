@@ -1,0 +1,32 @@
+# THC Open Mindfulness Resources API
+
+> A free, public, read-only REST API from [The Holistic Care](https://www.theholisticcare.com) exposing open mindfulness resources — research citations behind its content, a plain-language glossary of mindfulness/yoga/nonduality terms, 16 free browser-based mindfulness games, 111 free guided-audio practices, 527 blog post excerpts, and the public PanchaVikas early-years framework — as structured JSON. A unified `/v1/resources` endpoint and a `/v1/search` endpoint browse and search across every family at once. No auth or API key required. Blog endpoints expose metadata/excerpts only. Full article content remains on the canonical The Holistic Care website.
+
+This API is a machine-readable companion to [theholisticcare.com](https://www.theholisticcare.com), a mindfulness, yoga, and nonduality education platform for children, schools, and adults. Use it to pull verified, real research citations and canonical term definitions programmatically, rather than scraping the website.
+
+## Endpoints
+
+- [GET /v1/whitepapers](https://api.theholisticcare.com/v1/whitepapers) — list real, peer-reviewed research citations backing mindfulness/yoga/meditation claims. Filter by `topic` or `study_type`.
+- [GET /v1/whitepapers/{slug}](https://api.theholisticcare.com/v1/whitepapers/{slug}) — a single citation with its plain-language summary, key finding, and honest limitations.
+- [GET /v1/glossary](https://api.theholisticcare.com/v1/glossary) — plain-language definitions of mindfulness, yoga, nonduality, kundalini, and Ayurveda terms. Filter by `pillar`.
+- [GET /v1/glossary/{slug}](https://api.theholisticcare.com/v1/glossary/{slug}) — a single term's full definition, etymology, and related terms.
+- [GET /v1/mindfulness-games](https://api.theholisticcare.com/v1/mindfulness-games) — all 16 free browser-based mindfulness games for children, teens, and adults. Filter by `audience` or `skill`.
+- [GET /v1/mindfulness-games/{slug}](https://api.theholisticcare.com/v1/mindfulness-games/{slug}) — a single game's metadata and direct play URL.
+- [GET /v1/practices](https://api.theholisticcare.com/v1/practices) — all 111 free guided-audio practices from The Holistic Care's Stillness Library, each with a direct MP3 URL. Filter by `category`. Paid tracks are never exposed here.
+- [GET /v1/practices/{slug}](https://api.theholisticcare.com/v1/practices/{slug}) — a single practice's metadata, audio URL, and related free practices.
+- [GET /v1/blog](https://api.theholisticcare.com/v1/blog) — title, excerpt, tags, and canonical URL for 527 published blog posts. Blog endpoints expose metadata/excerpts only — full article content remains on the canonical The Holistic Care website. Filter by `tag` or search with `q`.
+- [GET /v1/blog/{slug}](https://api.theholisticcare.com/v1/blog/{slug}) — a single post's excerpt and a link to the full article.
+- [GET /v1/panchavikas/resources](https://api.theholisticcare.com/v1/panchavikas/resources) — the 5 public PanchaVikas early-years pathways plus the framework guide download. No curriculum or session-plan content.
+- [GET /v1/resources](https://api.theholisticcare.com/v1/resources) — browse every public resource family at once (blog, games, practices, whitepapers, glossary, PanchaVikas). Filter by `type`, `category`, `audience`, `skill`, `age_min`, `age_max`.
+- [GET /v1/search](https://api.theholisticcare.com/v1/search?q=) — free-text search (`q`, required) across the same 6 families' public title/summary/category/tags.
+- [GET /v1/categories](https://api.theholisticcare.com/v1/categories) — the current set of valid `topic`/`pillar` filter values.
+
+## Documentation
+
+- [Full docs](https://api.theholisticcare.com/docs)
+- [OpenAPI 3.x spec](https://api.theholisticcare.com/openapi/openapi.yaml)
+- [apis.json](https://api.theholisticcare.com/apis.json)
+
+## Terms
+
+Free, no attribution required, no API key. Best-effort rate limit of ~60 requests/minute per IP. Never proxies media files — only returns URLs to originals.

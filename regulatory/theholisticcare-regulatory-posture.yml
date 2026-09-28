@@ -1,0 +1,30 @@
+generated: '2026-09-28'
+method: probed
+signals:
+  data_subject_request:
+    - source: https://www.theholisticcare.com/privacy-policy
+      http_status: 200
+      fetched: true
+      quote: "You may have the right to: Access the personal data we hold about you; Request correction of inaccurate data; Request deletion of your data; Withdraw consent for marketing communications at any time"
+      section: "7. Your Rights"
+      note: Provides data subject rights including access, correction, deletion and consent withdrawal.
+    - source: https://www.theholisticcare.com/privacy-policy
+      http_status: 200
+      fetched: true
+      quote: "If you wish to delete your account and associated data, please contact us at info@theholisticcare.com"
+      section: "6. Data Retention"
+      note: Indicates how a user can request deletion of their data.
+  data_retention:
+    - source: https://www.theholisticcare.com/privacy-policy
+      http_status: 200
+      fetched: true
+      quote: "We retain your personal data for as long as your account is active or as needed to provide services."
+      section: "6. Data Retention"
+      note: Describes retention period tied to account activity.
+  subprocessors:
+    - source: https://www.theholisticcare.com/privacy-policy
+      http_status: 200
+      fetched: true
+      quote: "We may share your data only with trusted service providers who assist us in operating our website and services, including: Supabase — database and authentication; Razorpay — payment processing; Sanity.io — content management; Vercel — website hosting; Google Analytics — website traffic analysis."
+      section: "4. Sharing Your Information"
+      note: Lists third‑party service providers handling personal data.

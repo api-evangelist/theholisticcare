@@ -1,0 +1,27 @@
+{
+  "provider": "theholisticcare",
+  "sources": [
+    "theholisticcare-openapi.yaml"
+  ],
+  "outputs": [
+    "theholisticcare-health-api-openapi.yml",
+    "theholisticcare-resources-api-openapi.yml",
+    "theholisticcare-search-api-openapi.yml"
+  ],
+  "archived": [
+    "archived openapi/theholisticcare-openapi.yaml"
+  ],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "theholisticcare-openapi.yaml: upgraded openapi 3.0.3 -> OpenAPI 3.2.0",
+    "theholisticcare-openapi.yaml: tagged paths GET /health -> Health",
+    "theholisticcare-openapi.yaml: tagged paths GET /v1/resources -> Resources",
+    "theholisticcare-openapi.yaml: tagged paths GET /v1/search -> Search",
+    "theholisticcare-openapi.yaml: declared missing tag: Health",
+    "theholisticcare-openapi.yaml: declared missing tag: Resources",
+    "theholisticcare-openapi.yaml: declared missing tag: Search",
+    "apis.yml register: written (+3 apis, 4 total)"
+  ],
+  "skipped": []
+}
