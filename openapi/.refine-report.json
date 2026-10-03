@@ -1,19 +1,18 @@
 {
   "provider": "theholisticcare",
   "sources": [
-    "theholisticcare-openapi.yaml"
+    "_original/theholisticcare-openapi.yaml"
   ],
   "outputs": [
     "theholisticcare-health-api-openapi.yml",
     "theholisticcare-resources-api-openapi.yml",
     "theholisticcare-search-api-openapi.yml"
   ],
-  "archived": [
-    "archived openapi/theholisticcare-openapi.yaml"
-  ],
+  "archived": [],
   "errors": [],
   "warnings": [],
   "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
     "theholisticcare-openapi.yaml: upgraded openapi 3.0.3 -> OpenAPI 3.2.0",
     "theholisticcare-openapi.yaml: tagged paths GET /health -> Health",
     "theholisticcare-openapi.yaml: tagged paths GET /v1/resources -> Resources",
@@ -21,7 +20,11 @@
     "theholisticcare-openapi.yaml: declared missing tag: Health",
     "theholisticcare-openapi.yaml: declared missing tag: Resources",
     "theholisticcare-openapi.yaml: declared missing tag: Search",
-    "apis.yml register: written (+3 apis, 4 total)"
+    "apis.yml register: already-registered"
   ],
-  "skipped": []
+  "skipped": [
+    "theholisticcare-health-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "theholisticcare-resources-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "theholisticcare-search-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }
