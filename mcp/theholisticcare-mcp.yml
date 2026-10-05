@@ -1,7 +1,366 @@
-generated: '2026-09-28'
-method: derived
-source: "openapi/openapi.yaml"
+generated: '2026-10-05'
+method: probed
+source: https://mcp.theholisticcare.com/mcp
+status: published
+sources:
+- POST https://mcp.theholisticcare.com/mcp initialize, tools/list and resources/list (2026-10-05, streamable-http, text/event-stream)
+- https://registry.modelcontextprotocol.io/v0/servers?search=theholisticcare (com.theholisticcare/open-mindfulness, active, version
+  1.0.0, published 2026-09-29)
+- https://github.com/mohanagc/thc-mindfulness-mcp (MIT source; server.json)
+- Provider email, Mohan Chute, 2026-10-04 (MCP server recognition / re-score request)
+server:
+  name: com.theholisticcare/open-mindfulness
+  title: THC Open Mindfulness MCP
+  server_info_name: thc-open-mindfulness
+  version: 1.0.0
+  description: Read-only MCP server providing structured mindfulness games, free guided practices, research resources, glossary concepts,
+    PanchaVikas public resources and cross-resource discovery from The Holistic Care.
+  website: https://www.theholisticcare.com
+  protocol_version: '2025-06-18'
+  transport: streamable-http
+  url: https://mcp.theholisticcare.com/mcp
+  capabilities:
+    tools:
+      listChanged: true
+    resources:
+      listChanged: true
+  repository: https://github.com/mohanagc/thc-mindfulness-mcp
+  license: MIT
+  registry: Official MCP Registry, com.theholisticcare/open-mindfulness, status active, published 2026-09-29
+  instructions: This server provides approved public mindfulness resources from The Holistic Care (games, free guided practices, research
+    citations, glossary terms, and PanchaVikas framework overviews). All tools are read-only and unauthenticated. When presenting a
+    resource, prefer its supplied source_url or canonical_url over restating details. Do not treat any resource as medical diagnosis,
+    treatment, or emergency care, and do not claim this server can access premium, paid, or private The Holistic Care content — it cannot,
+    by design.
+auth:
+  methods:
+  - none
+  note: initialize, tools/list and resources/list answered 200 without credentials; every tool is annotated read-only.
 deployment:
-  mode: none
+  mode: remote
+  endpoint: https://mcp.theholisticcare.com/mcp
   auth: none
-  verified: derived
+  verified: probed
+  verification: '2026-10-05: POST initialize returned 200 text/event-stream with serverInfo thc-open-mindfulness "THC Open Mindfulness
+    MCP" 1.0.0 (protocol 2025-06-18); tools/list returned 7 tools and resources/list 5 resources; prompts/list answers -32601 (no prompts).
+    GET returns 405. An invented path on the host returns a real 404.'
+tool_count: 7
+tools:
+- name: search_mindfulness_resources
+  title: Search mindfulness resources
+  description: Free-text search across every public resource family on The Holistic Care (blog articles, mindfulness games, free guided
+    practices, research summaries, glossary terms, and public PanchaVikas resources). Use this as the general entry point when a request
+    doesn't clearly belong to one specific family — e.g. 'Find something about breathing for anxiety' or 'What has THC published about
+    nondual awareness?'. `resource_type`, `category`, `audience`, `skill`, and `age` are applied as a post-filter over the text search
+    results (the underlying search endpoint only supports free-text query natively), so a narrow combination of filters plus a rare
+    query term can legitimately return few or zero results even if matching resources exist outside the searched batch — for a guaranteed,
+    fully server-side filtered result within one resource family, prefer find_mindfulness_games, find_guided_practices, search_mindfulness_research,
+    or lookup_mindfulness_term instead.
+  annotations:
+    readOnlyHint: true
+    destructiveHint: false
+    idempotentHint: true
+    openWorldHint: true
+  inputSchema:
+    type: object
+    $schema: https://json-schema.org/draft/2020-12/schema
+    properties:
+      query:
+        type: string
+        minLength: 1
+        maxLength: 200
+      resource_type:
+        type: string
+        enum:
+        - blog
+        - mindfulness_game
+        - guided_practice
+        - research
+        - glossary
+        - panchavikas_pathway
+        - panchavikas_download
+      category:
+        type: string
+        maxLength: 80
+      audience:
+        type: string
+        maxLength: 80
+      skill:
+        type: string
+        maxLength: 80
+      age:
+        type: integer
+        minimum: 0
+        maximum: 120
+      limit:
+        type: integer
+        minimum: 1
+        maximum: 20
+    required:
+    - query
+- name: get_mindfulness_resource
+  title: Get one mindfulness resource
+  description: Fetches the full detail record for ONE specific, already-identified public resource — use this after search_mindfulness_resources
+    or another find/search tool has surfaced a slug or id you now want the complete record for (e.g. a glossary term's full extended
+    explanation, or a game's full description). For blog/mindfulness_game/guided_practice/research/glossary, `identifier` is the resource's
+    slug. For panchavikas_pathway/panchavikas_download, `identifier` is the resource's stable id (e.g. 'PV-pathway-jal'), since that
+    family has no slug. A resource that does not exist and a resource that exists but is private behave identically here (a clean not-found
+    result) — this tool never confirms or denies the existence of private content.
+  annotations:
+    readOnlyHint: true
+    destructiveHint: false
+    idempotentHint: true
+    openWorldHint: true
+  inputSchema:
+    type: object
+    $schema: https://json-schema.org/draft/2020-12/schema
+    properties:
+      resource_type:
+        type: string
+        enum:
+        - blog
+        - mindfulness_game
+        - guided_practice
+        - research
+        - glossary
+        - panchavikas_pathway
+        - panchavikas_download
+      identifier:
+        type: string
+        minLength: 1
+        maxLength: 160
+        description: The resource's slug for blog/mindfulness_game/guided_practice/research/glossary. The resource's stable id (e.g.
+          'PV-pathway-jal') for panchavikas_pathway/panchavikas_download.
+    required:
+    - resource_type
+    - identifier
+- name: find_mindfulness_games
+  title: Find mindfulness games
+  description: Finds interactive mindfulness games for children, teens, or adults from The Holistic Care's public games library — e.g.
+    'a grounding game for a 9-year-old' or 'a short breathing game under 5 minutes'. `age` and `max_duration_minutes` only match games
+    whose own published metadata actually states an age range or duration; a game with no stated age range is never assumed to fit.
+    Most games in this library are free; a small number require an email to access — check each result's `access` field rather than
+    assuming.
+  annotations:
+    readOnlyHint: true
+    destructiveHint: false
+    idempotentHint: true
+    openWorldHint: true
+  inputSchema:
+    type: object
+    $schema: https://json-schema.org/draft/2020-12/schema
+    properties:
+      query:
+        type: string
+        minLength: 1
+        maxLength: 200
+      age:
+        type: integer
+        minimum: 0
+        maximum: 120
+      skill:
+        type: string
+        enum:
+        - attention
+        - body-awareness
+        - breathwork
+        - cognitive-reframing
+        - emotional-regulation
+        - gratitude
+        - grounding
+        - loving-kindness
+        - mindful-listening
+        - nondual-awareness
+        - relaxation
+        - self-compassion
+        - sleep
+      audience:
+        type: string
+        enum:
+        - children
+        - teens
+        - adults
+        - educators
+        - parents
+      max_duration_minutes:
+        type: integer
+        minimum: 1
+        maximum: 600
+      limit:
+        type: integer
+        minimum: 1
+        maximum: 20
+- name: find_guided_practices
+  title: Find free guided practices
+  description: 'Finds free guided audio practices from The Holistic Care''s Stillness Library (short guided meditations, breathing practices,
+    and Yoga Nidra sessions) — e.g. ''a free practice for someone upset after an argument'' or ''a short breathing practice for children''.
+    Every result returned by this tool is free; paid Stillness Library tracks are never exposed through the public API this server relies
+    on. There is no audience metadata on practices — use category: ''children'' for child-appropriate practices, and treat other audience
+    assumptions as unsupported rather than inferred.'
+  annotations:
+    readOnlyHint: true
+    destructiveHint: false
+    idempotentHint: true
+    openWorldHint: true
+  inputSchema:
+    type: object
+    $schema: https://json-schema.org/draft/2020-12/schema
+    properties:
+      query:
+        type: string
+        minLength: 1
+        maxLength: 200
+      category:
+        type: string
+        enum:
+        - mindfulness
+        - children
+        - breathwork
+        - nondual-awareness
+        - yoga-nidra
+        - students
+        - sleep
+      max_duration_minutes:
+        type: integer
+        minimum: 1
+        maximum: 600
+      limit:
+        type: integer
+        minimum: 1
+        maximum: 20
+- name: search_mindfulness_research
+  title: Search mindfulness research summaries
+  description: Finds plain-language summaries of published research behind The Holistic Care's mindfulness, meditation, and yoga content
+    — e.g. 'research on yoga nidra and sleep' or 'meta-analyses on mindfulness for anxiety'. Each result is a summary of a real study
+    (with authors, year, journal, and a stated limitations note where available), never a THC-authored medical claim. This tool does
+    not provide medical advice, diagnosis, or treatment guidance, and study findings should not be read as guarantees of outcome for
+    any individual.
+  annotations:
+    readOnlyHint: true
+    destructiveHint: false
+    idempotentHint: true
+    openWorldHint: true
+  inputSchema:
+    type: object
+    $schema: https://json-schema.org/draft/2020-12/schema
+    properties:
+      query:
+        type: string
+        minLength: 1
+        maxLength: 200
+      topic:
+        type: string
+        enum:
+        - mindfulness
+        - meditation
+        - yoga
+        - sleep
+        - nonduality
+        - children
+        - anxiety
+        - physiology
+      study_type:
+        type: string
+        enum:
+        - rct
+        - meta-analysis
+        - observational
+        - cohort
+        - clinical-trial
+        - physiological
+        - guideline
+      limit:
+        type: integer
+        minimum: 1
+        maximum: 20
+- name: lookup_mindfulness_term
+  title: Look up a mindfulness/yoga/nonduality term
+  description: Looks up the definition of a single mindfulness, yoga, meditation, kundalini, ayurveda, or nonduality term from The Holistic
+    Care's public glossary — e.g. 'What does aparigraha mean?' or 'define yoga nidra'. Returns at most one best-matching term with its
+    plain-language definition and, when available, etymology and related terms. If the term genuinely isn't in the glossary, this returns
+    a clear no-match result rather than a guessed or invented definition.
+  annotations:
+    readOnlyHint: true
+    destructiveHint: false
+    idempotentHint: true
+    openWorldHint: true
+  inputSchema:
+    type: object
+    $schema: https://json-schema.org/draft/2020-12/schema
+    properties:
+      term:
+        type: string
+        minLength: 1
+        maxLength: 120
+      pillar:
+        type: string
+        enum:
+        - nonduality
+        - yoga
+        - meditation
+        - kundalini
+        - ayurveda
+        - general-wisdom
+    required:
+    - term
+- name: find_panchavikas_resources
+  title: Find public PanchaVikas resources
+  description: Finds The Holistic Care's public PanchaVikas resources — the five-element (Prithvi/Jal/Agni/Vayu/Akash) child-development
+    framework's public overview, public pathway summaries, and the public downloadable guide — e.g. 'public PanchaVikas resources related
+    to Jal' or 'what is the PanchaVikas Prithvi pathway about'. This tool ONLY has access to public framework material. It does NOT
+    have access to, and cannot retrieve, the private 216-session school curriculum, session plans, teacher scripts, or any other proprietary
+    implementation material — a request for that content should be answered by explaining that only the public framework overview and
+    pathway summaries are available here, and returning those if relevant.
+  annotations:
+    readOnlyHint: true
+    destructiveHint: false
+    idempotentHint: true
+    openWorldHint: true
+  inputSchema:
+    type: object
+    $schema: https://json-schema.org/draft/2020-12/schema
+    properties:
+      element:
+        type: string
+        enum:
+        - prithvi
+        - jal
+        - agni
+        - vayu
+        - akash
+      query:
+        type: string
+        minLength: 1
+        maxLength: 200
+      resource_type:
+        type: string
+        enum:
+        - panchavikas_pathway
+        - panchavikas_download
+      limit:
+        type: integer
+        minimum: 1
+        maximum: 20
+resource_count: 5
+resources:
+- uri: thc://about
+  name: about
+  title: About THC Open Mindfulness MCP
+  mimeType: text/markdown
+- uri: thc://taxonomy
+  name: taxonomy
+  title: Public resource taxonomy
+  mimeType: text/markdown
+- uri: thc://usage
+  name: usage
+  title: Usage and fair-use notes
+  mimeType: text/markdown
+- uri: thc://content-rights
+  name: content-rights
+  title: Content rights and licensing
+  mimeType: text/markdown
+- uri: thc://panchavikas/framework
+  name: panchavikas-framework
+  title: PanchaVikas public framework overview
+  mimeType: text/markdown
+prompt_count: 0

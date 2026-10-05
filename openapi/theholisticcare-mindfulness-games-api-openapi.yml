@@ -1,6 +1,6 @@
 openapi: 3.2.0
 info:
-  title: THC Open Mindfulness Resources API
+  title: THC Open Mindfulness Resources Mindfulness Games API
   version: 1.0.0
   description: A free, public, read-only REST API exposing The Holistic Care's open mindfulness resources — research citations (whitepapers), a plain-language glossary, 16 free mindfulness games, 111 free guided-audio practices, blog post excerpts, and the public PanchaVikas early-years framework — as structured JSON.
   contact:
@@ -14,67 +14,76 @@ servers:
 - url: https://api.theholisticcare.com
   description: Production (only environment currently deployed)
 tags:
-- name: Resources
+- name: Mindfulness Games
 paths:
-  /v1/resources:
+  /v1/mindfulness-games:
     get:
-      summary: Browse every public resource family at once
-      description: A discovery/browse layer over 6 families (blog, mindfulness games, guided practices, research citations, glossary terms, PanchaVikas). Not a replacement for the dedicated per-family endpoints — call those directly for the full field set of a specific family.
+      summary: List free mindfulness games
       parameters:
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
-      - name: type
-        in: query
-        schema:
-          type: string
-          enum:
-          - blog
-          - mindfulness_game
-          - guided_practice
-          - research
-          - glossary
-          - panchavikas_pathway
-          - panchavikas_download
-      - name: category
-        in: query
-        schema:
-          type: string
       - name: audience
         in: query
         schema:
           type: string
+          enum:
+          - children
+          - teens
+          - adults
+          - educators
+          - parents
       - name: skill
         in: query
         schema:
           type: string
-      - name: age_min
-        in: query
-        schema:
-          type: integer
-      - name: age_max
-        in: query
-        schema:
-          type: integer
+          enum:
+          - attention
+          - body-awareness
+          - breathwork
+          - cognitive-reframing
+          - emotional-regulation
+          - gratitude
+          - grounding
+          - loving-kindness
+          - mindful-listening
+          - nondual-awareness
+          - relaxation
+          - self-compassion
+          - sleep
       responses:
         '200':
-          description: A paginated list of normalized public resources.
+          description: A paginated list of mindfulness games (16 total, all free).
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResourceListResponse'
+                $ref: '#/components/schemas/GameListResponse'
         '400':
-          description: 'Invalid `type` value (`invalid_type`), or a malformed `limit`/ `offset` value (`invalid_parameter`) — see /docs#pagination.
-
-            '
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/InvalidParameter'
         '429':
           $ref: '#/components/responses/RateLimited'
       tags:
-      - Resources
-      operationId: getV1Resources
+      - Mindfulness Games
+      operationId: getV1MindfulnessGames
+      x-operation-id-source: derived
+  /v1/mindfulness-games/{slug}:
+    get:
+      summary: Get a single mindfulness game by slug
+      parameters:
+      - $ref: '#/components/parameters/slug'
+      responses:
+        '200':
+          description: A single mindfulness game.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+      tags:
+      - Mindfulness Games
+      operationId: getV1MindfulnessGamesBySlug
       x-operation-id-source: derived
 components:
   parameters:
@@ -88,6 +97,12 @@ components:
         type: integer
         default: 20
         maximum: 100
+    slug:
+      name: slug
+      in: path
+      required: true
+      schema:
+        type: string
     offset:
       name: offset
       in: query
@@ -98,48 +113,39 @@ components:
         type: integer
         default: 0
   schemas:
-    Resource:
+    Game:
       type: object
-      description: 'The common normalized shape used by /v1/resources and /v1/search across all 6 families. Fields not applicable to a given resource''s type are null rather than fabricated. `id` is populated for every resource, using each family''s existing stable public identifier where one already exists (mindfulness_game uses its `MG-*` api_id, guided_practice uses its `SL-*` track_id, panchavikas_* uses its `PV-*` id), or a deterministic `type:slug` pair otherwise (e.g. `blog:<slug>`, `research:<slug>`, `glossary:<slug>`) — never a raw Sanity `_id`. `slug` is populated for every type except panchavikas_pathway/panchavikas_download, which have no real slug field and are always null there. A blog-type resource still always has `category` set to null (unlike id/slug, which changed 2026-09-25 — see HANDOFF.md), matching the fact that blog posts have no equivalent taxonomy field exposed elsewhere in this API. Note this Resource shape (used only by /v1/resources and /v1/search) is intentionally richer than the dedicated /v1/blog endpoint''s own response, which still omits id/slug/type/updated_at entirely per Mohan''s original instruction for that endpoint specifically.
-
-        '
       properties:
         id:
           type: string
-        title:
-          type: string
+          description: The stable public game ID (same value as `api_id`), in the form "MG-*". Never the raw Sanity `_id`.
+          example: MG-001
         slug:
-          type:
-          - string
-          - 'null'
+          type: string
         type:
           type: string
           enum:
-          - blog
           - mindfulness_game
-          - guided_practice
-          - research
-          - glossary
-          - panchavikas_pathway
-          - panchavikas_download
-        summary:
-          type:
-          - string
-          - 'null'
-        category:
-          type:
-          - string
-          - 'null'
-        tags:
-          type:
-          - array
-          - 'null'
+        api_id:
+          type: string
+        title:
+          type: string
+        url:
+          type: string
+        icon:
+          type: string
+        tag:
+          type: string
+        description:
+          type: string
+        free:
+          type: boolean
+        keywords:
+          type: array
           items:
             type: string
         audiences:
-          type:
-          - array
-          - 'null'
+          type: array
           items:
             type: string
         age_min:
@@ -155,31 +161,24 @@ components:
           - integer
           - 'null'
         skills:
-          type:
-          - array
-          - 'null'
+          type: array
           items:
             type: string
-        access:
-          type:
-          - string
-          - 'null'
-          description: e.g. "free". Never "paid" — no paid content is ever exposed by this API.
-        source_url:
-          type: string
         updated_at:
-          type:
-          - string
-          - 'null'
+          type: string
           format: date-time
       example:
         id: MG-001
-        title: Breathing Buddy
         slug: breathing-buddy
         type: mindfulness_game
-        summary: A gentle breathing pacer for young children.
-        category: Breathing
-        tags:
+        api_id: MG-001
+        title: Breathing Buddy
+        url: https://www.theholisticcare.com/games/breathing-buddy.html
+        icon: 🫧
+        tag: Breathing
+        description: A gentle breathing pacer for young children.
+        free: true
+        keywords:
         - breathing
         - calm
         - kids
@@ -190,9 +189,14 @@ components:
         duration_minutes: 5
         skills:
         - breathwork
-        access: free
-        source_url: https://www.theholisticcare.com/games/breathing-buddy.html
         updated_at: '2026-09-24T00:00:00.000Z'
+    GameDetailResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Game'
+        meta:
+          $ref: '#/components/schemas/Meta'
     Pagination:
       type: object
       properties:
@@ -202,30 +206,6 @@ components:
           type: integer
         total:
           type: integer
-    Meta:
-      type: object
-      description: Present on every successful response.
-      properties:
-        generated_at:
-          type: string
-          format: date-time
-        provider:
-          type: string
-          example: The Holistic Care
-        source:
-          type: string
-          example: https://www.theholisticcare.com
-    ResourceListResponse:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Resource'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-        meta:
-          $ref: '#/components/schemas/Meta'
     Error:
       type: object
       properties:
@@ -243,9 +223,49 @@ components:
         error:
           code: not_found
           message: No public blog post found for slug "example-slug".
+    Meta:
+      type: object
+      description: Present on every successful response.
+      properties:
+        generated_at:
+          type: string
+          format: date-time
+        provider:
+          type: string
+          example: The Holistic Care
+        source:
+          type: string
+          example: https://www.theholisticcare.com
+    GameListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Game'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        meta:
+          $ref: '#/components/schemas/Meta'
   responses:
     RateLimited:
       description: 'Too many requests from this IP recently (best-effort ~60 req/min; see /docs#rate-limiting for the honest limitations of this enforcement on serverless infrastructure).
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: 'No public record exists at that slug. A record that exists but is a draft, unpublished, or not opted into the API returns this exact same response as a slug that doesn''t exist at all — never a different error that would reveal a private record''s existence.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InvalidParameter:
+      description: 'A malformed `limit` or `offset` value (non-numeric, non-integer, a non-positive `limit`, or a negative `offset`) — see /docs#pagination. Every endpoint below that accepts `limit`/`offset` can return this.
 
         '
       content:

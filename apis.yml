@@ -8,7 +8,7 @@ x-tier: profiled
 x-tier-reason: enrichment pass 2026-09-28 (modular-v1; was harvest)
 specificationVersion: '0.20'
 created: '2026-09-28'
-modified: '2026-09-28'
+modified: '2026-10-05'
 tags:
 - Mindfulness
 - Education
@@ -31,7 +31,7 @@ apis:
   humanURL: https://api.theholisticcare.com/docs
   baseURL: https://api.theholisticcare.com
   openAPI:
-    url: openapi/theholisticcare-openapi.yaml
+    url: https://api.theholisticcare.com/openapi/openapi.yaml
     type: OpenAPI
 - aid: theholisticcare:theholisticcare-health-api
   name: The Holistic Care — THC Open Mindfulness API Health API
@@ -63,6 +63,99 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/theholisticcare-search-api-openapi.yml
+- aid: theholisticcare:theholisticcare-blog-api
+  name: The Holistic Care — THC Open Mindfulness API Blog API
+  description: >-
+    The Blog API from The Holistic Care — THC Open Mindfulness API — 2 operation(s) for blog.
+  humanURL: https://api.theholisticcare.com/docs
+  tags:
+  - Blog
+  properties:
+  - type: OpenAPI
+    url: openapi/theholisticcare-blog-api-openapi.yml
+- aid: theholisticcare:theholisticcare-categories-api
+  name: The Holistic Care — THC Open Mindfulness API Categories API
+  description: >-
+    The Categories API from The Holistic Care — THC Open Mindfulness API — 1 operation(s) for categories.
+  humanURL: https://api.theholisticcare.com/docs
+  tags:
+  - Categories
+  properties:
+  - type: OpenAPI
+    url: openapi/theholisticcare-categories-api-openapi.yml
+- aid: theholisticcare:theholisticcare-glossary-api
+  name: The Holistic Care — THC Open Mindfulness API Glossary API
+  description: >-
+    The Glossary API from The Holistic Care — THC Open Mindfulness API — 2 operation(s) for glossary.
+  humanURL: https://api.theholisticcare.com/docs
+  tags:
+  - Glossary
+  properties:
+  - type: OpenAPI
+    url: openapi/theholisticcare-glossary-api-openapi.yml
+- aid: theholisticcare:theholisticcare-mindfulness-games-api
+  name: The Holistic Care — THC Open Mindfulness API Mindfulness Games API
+  description: >-
+    The Mindfulness Games API from The Holistic Care — THC Open Mindfulness API — 2 operation(s) for mindfulness
+    games.
+  humanURL: https://api.theholisticcare.com/docs
+  tags:
+  - Mindfulness Games
+  properties:
+  - type: OpenAPI
+    url: openapi/theholisticcare-mindfulness-games-api-openapi.yml
+- aid: theholisticcare:theholisticcare-panchavikas-api
+  name: The Holistic Care — THC Open Mindfulness API Panchavikas API
+  description: >-
+    The Panchavikas API from The Holistic Care — THC Open Mindfulness API — 1 operation(s) for panchavikas.
+  humanURL: https://api.theholisticcare.com/docs
+  tags:
+  - Panchavikas
+  properties:
+  - type: OpenAPI
+    url: openapi/theholisticcare-panchavikas-api-openapi.yml
+- aid: theholisticcare:theholisticcare-practices-api
+  name: The Holistic Care — THC Open Mindfulness API Practices API
+  description: >-
+    The Practices API from The Holistic Care — THC Open Mindfulness API — 2 operation(s) for practices.
+  humanURL: https://api.theholisticcare.com/docs
+  tags:
+  - Practices
+  properties:
+  - type: OpenAPI
+    url: openapi/theholisticcare-practices-api-openapi.yml
+- aid: theholisticcare:theholisticcare-whitepapers-api
+  name: The Holistic Care — THC Open Mindfulness API Whitepapers API
+  description: >-
+    The Whitepapers API from The Holistic Care — THC Open Mindfulness API — 2 operation(s) for whitepapers.
+  humanURL: https://api.theholisticcare.com/docs
+  tags:
+  - Whitepapers
+  properties:
+  - type: OpenAPI
+    url: openapi/theholisticcare-whitepapers-api-openapi.yml
+- aid: theholisticcare:thc-open-mindfulness-mcp-server
+  name: THC Open Mindfulness MCP Server
+  description: >-
+    Production remote MCP server (streamable HTTP, serverInfo thc-open-mindfulness "THC Open Mindfulness MCP" 1.0.0) with seven
+    read-only, unauthenticated tools (search_mindfulness_resources, get_mindfulness_resource, find_mindfulness_games, find_guided_practices,
+    search_mindfulness_research, lookup_mindfulness_term, find_panchavikas_resources) and five markdown resources over The Holistic Care's
+    public mindfulness games, guided practices, research, glossary and PanchaVikas resources. Listed in the official MCP Registry as
+    com.theholisticcare/open-mindfulness; MIT-licensed source on GitHub.
+  humanURL: https://github.com/mohanagc/thc-mindfulness-mcp
+  baseURL: https://mcp.theholisticcare.com/mcp
+  tags:
+  - MCP
+  - Mindfulness
+  properties:
+  - type: MCPServer
+    url: mcp/theholisticcare-mcp.yml
+  - type: SourceCode
+    url: https://github.com/mohanagc/thc-mindfulness-mcp
+  - type: GitHubRepository
+    url: https://github.com/mohanagc/thc-mindfulness-mcp
+  - type: MCPRegistry
+    url: https://registry.modelcontextprotocol.io/v0/servers?search=com.theholisticcare/open-mindfulness
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -71,6 +164,14 @@ maintainers:
 common:
 - type: DomainSecurity
   url: security/theholisticcare-domain-security.yml
+- type: MCPServer
+  url: mcp/theholisticcare-mcp.yml
+- type: LLMsTxt
+  url: llms/theholisticcare-llms.txt
+- type: RateLimits
+  url: rate-limits/theholisticcare-rate-limits.yml
+- type: AgenticAccess
+  url: agentic-access/theholisticcare-agentic-access.yml
 - type: Website
   url: https://api.theholisticcare.com/
 - type: Documentation
@@ -91,6 +192,21 @@ x-submission-notes: Official public read-only REST API, no auth/key/cost; apis.j
   /openapi/openapi.yaml, llms.txt.
 x-submission-probe: '2026-09-28: root 200, invented 404, llms 200, apis.json 200, openapi 200, docs 200'
 x-submitted-by: mohan@theholisticcare.com (apis.io/add, 2026-09-28)
+x-correction-request:
+  requested: '2026-10-04'
+  source:
+  - 'Provider email, Mohan Chute (mohan@theholisticcare.com), 2026-10-04: MCP server recognition / re-score request (fastmail 38348)'
+  request: 'Profile shows MCP Server 0/12, but The Holistic Care runs a production MCP server at https://mcp.theholisticcare.com/mcp
+    (official MCP Registry com.theholisticcare/open-mindfulness, source https://github.com/mohanagc/thc-mindfulness-mcp), alongside the
+    REST API https://api.theholisticcare.com with OpenAPI https://api.theholisticcare.com/openapi/openapi.yaml.'
+  applied: '2026-10-05'
+  applied_note: 'Verified live 2026-10-05: initialize 200 (thc-open-mindfulness "THC Open Mindfulness MCP" 1.0.0, protocol 2025-06-18), tools/list
+    7 tools, resources/list 5 resources, registry entry active (published 2026-09-29), source repo MIT. Added API "THC Open Mindfulness MCP
+    Server" with MCPServer, SourceCode, GitHubRepository and MCPRegistry properties; mcp/theholisticcare-mcp.yml rebuilt from the live probe
+    (was a derived mode-none stub); common MCPServer pointer. The stored OpenAPI was a 3-path snapshot while the live document has 15 paths:
+    _original refreshed from https://api.theholisticcare.com/openapi/openapi.yaml and re-split (10 per-tag APIs, 7 new), agentic-access
+    regenerated (15 ops); the first API entry''s OpenAPI pointer named a file that did not exist and now names the live first-party URL.
+    Also wired RateLimits, LLMsTxt and AgenticAccess pointers to files that existed but were unreferenced (2026-09-28 wave log).'
 x-enrichment:
   date: '2026-09-28'
   status: enriched

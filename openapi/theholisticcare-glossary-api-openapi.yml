@@ -1,0 +1,258 @@
+openapi: 3.2.0
+info:
+  title: THC Open Mindfulness Resources Glossary API
+  version: 1.0.0
+  description: A free, public, read-only REST API exposing The Holistic Care's open mindfulness resources — research citations (whitepapers), a plain-language glossary, 16 free mindfulness games, 111 free guided-audio practices, blog post excerpts, and the public PanchaVikas early-years framework — as structured JSON.
+  contact:
+    name: The Holistic Care
+    url: https://www.theholisticcare.com
+    email: info@theholisticcare.com
+  license:
+    name: MIT (code only — see LICENSING.md for content rights)
+    url: https://github.com/mohanagc/thc-open-mindfulness-api/blob/main/LICENSE
+servers:
+- url: https://api.theholisticcare.com
+  description: Production (only environment currently deployed)
+tags:
+- name: Glossary
+paths:
+  /v1/glossary:
+    get:
+      summary: List glossary terms
+      parameters:
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - name: pillar
+        in: query
+        schema:
+          type: string
+          enum:
+          - nonduality
+          - yoga
+          - meditation
+          - kundalini
+          - ayurveda
+          - general-wisdom
+      responses:
+        '200':
+          description: A paginated list of glossary terms.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlossaryListResponse'
+        '400':
+          $ref: '#/components/responses/InvalidParameter'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+      tags:
+      - Glossary
+      operationId: getV1Glossary
+      x-operation-id-source: derived
+  /v1/glossary/{slug}:
+    get:
+      summary: Get a single glossary term by slug
+      parameters:
+      - $ref: '#/components/parameters/slug'
+      responses:
+        '200':
+          description: A single glossary term, including its extended explanation and related terms/posts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlossaryDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+      tags:
+      - Glossary
+      operationId: getV1GlossaryBySlug
+      x-operation-id-source: derived
+components:
+  parameters:
+    limit:
+      name: limit
+      in: query
+      description: 'Max records to return (default 20). A non-numeric, non-integer, or non-positive value (e.g. `abc`, `1.5`, `0`, `-1`) returns a 400 `invalid_parameter` error rather than silently falling back to the default. A value above the documented maximum (100) is the one exception: it is NOT an error, it is silently clamped to 100 — see /docs#pagination for the full rationale for that one intentional exception.
+
+        '
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+    slug:
+      name: slug
+      in: path
+      required: true
+      schema:
+        type: string
+    offset:
+      name: offset
+      in: query
+      description: 'Records to skip (default 0). A non-numeric, non-integer, or negative value (e.g. `abc`, `1.5`, `-1`) returns a 400 `invalid_parameter` error rather than silently falling back to 0 — see /docs#pagination.
+
+        '
+      schema:
+        type: integer
+        default: 0
+  schemas:
+    GlossaryListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/GlossaryTerm'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        meta:
+          $ref: '#/components/schemas/Meta'
+    Pagination:
+      type: object
+      properties:
+        limit:
+          type: integer
+        offset:
+          type: integer
+        total:
+          type: integer
+    RelatedRef:
+      type: object
+      properties:
+        slug:
+          type: string
+        title:
+          type: string
+    GlossaryTermDetail:
+      allOf:
+      - $ref: '#/components/schemas/GlossaryTerm'
+      - type: object
+        properties:
+          extended_explanation:
+            description: A small Portable Text block array (Sanity's rich-text format), not plain HTML or Markdown.
+            type:
+            - array
+            - 'null'
+            items:
+              type: object
+          related_terms:
+            type: array
+            items:
+              $ref: '#/components/schemas/RelatedTermRef'
+          related_posts:
+            type: array
+            items:
+              $ref: '#/components/schemas/RelatedRef'
+    GlossaryTerm:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Deterministic public ID in the form "glossary:<slug>". Never the raw Sanity `_id`.
+          example: glossary:pranayama
+        slug:
+          type: string
+        type:
+          type: string
+          enum:
+          - glossary_term
+        title:
+          type: string
+        pillar:
+          type: string
+        summary:
+          type: string
+        etymology:
+          type:
+          - string
+          - 'null'
+        also_known_as:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+        updated_at:
+          type: string
+          format: date-time
+      example:
+        id: glossary:pranayama
+        slug: pranayama
+        type: glossary_term
+        title: Pranayama
+        pillar: yoga
+        summary: The yogic practice of consciously regulating the breath.
+        etymology: 'Sanskrit: prana (life force/breath) + ayama (extension, restraint).'
+        also_known_as:
+        - breathwork
+        - breath control
+        updated_at: '2026-09-01T00:00:00.000Z'
+    RelatedTermRef:
+      type: object
+      properties:
+        slug:
+          type: string
+        title:
+          type: string
+    Meta:
+      type: object
+      description: Present on every successful response.
+      properties:
+        generated_at:
+          type: string
+          format: date-time
+        provider:
+          type: string
+          example: The Holistic Care
+        source:
+          type: string
+          example: https://www.theholisticcare.com
+    GlossaryDetailResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/GlossaryTermDetail'
+        meta:
+          $ref: '#/components/schemas/Meta'
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Short, machine-readable identifier. See /docs#errors for the full list.
+              example: not_found
+            message:
+              type: string
+              description: Human-readable, safe to show a developer. Never a stack trace or internal detail.
+      example:
+        error:
+          code: not_found
+          message: No public blog post found for slug "example-slug".
+  responses:
+    NotFound:
+      description: 'No public record exists at that slug. A record that exists but is a draft, unpublished, or not opted into the API returns this exact same response as a slug that doesn''t exist at all — never a different error that would reveal a private record''s existence.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InvalidParameter:
+      description: 'A malformed `limit` or `offset` value (non-numeric, non-integer, a non-positive `limit`, or a negative `offset`) — see /docs#pagination. Every endpoint below that accepts `limit`/`offset` can return this.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    RateLimited:
+      description: 'Too many requests from this IP recently (best-effort ~60 req/min; see /docs#rate-limiting for the honest limitations of this enforcement on serverless infrastructure).
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

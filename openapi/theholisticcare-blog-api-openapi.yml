@@ -1,0 +1,204 @@
+openapi: 3.2.0
+info:
+  title: THC Open Mindfulness Resources Blog API
+  version: 1.0.0
+  description: A free, public, read-only REST API exposing The Holistic Care's open mindfulness resources — research citations (whitepapers), a plain-language glossary, 16 free mindfulness games, 111 free guided-audio practices, blog post excerpts, and the public PanchaVikas early-years framework — as structured JSON.
+  contact:
+    name: The Holistic Care
+    url: https://www.theholisticcare.com
+    email: info@theholisticcare.com
+  license:
+    name: MIT (code only — see LICENSING.md for content rights)
+    url: https://github.com/mohanagc/thc-open-mindfulness-api/blob/main/LICENSE
+servers:
+- url: https://api.theholisticcare.com
+  description: Production (only environment currently deployed)
+tags:
+- name: Blog
+paths:
+  /v1/blog:
+    get:
+      summary: List blog post excerpts
+      description: Blog endpoints expose metadata/excerpts only. Full article content remains on the canonical The Holistic Care website. The response shape is deliberately minimal (title, excerpt, tags, canonical_url only) and does not include id, slug, type, or updated_at, unlike every other resource in this API.
+      parameters:
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - name: tag
+        in: query
+        description: Fuzzy-matches against the post's tags.
+        schema:
+          type: string
+      - name: q
+        in: query
+        description: Free-text search across title, excerpt, and tags only. Never searches article body.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: A paginated list of blog post excerpts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogPostListResponse'
+        '400':
+          $ref: '#/components/responses/InvalidParameter'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+      tags:
+      - Blog
+      operationId: getV1Blog
+      x-operation-id-source: derived
+  /v1/blog/{slug}:
+    get:
+      summary: Get a single blog post excerpt by slug
+      parameters:
+      - $ref: '#/components/parameters/slug'
+      responses:
+        '200':
+          description: A single blog post excerpt.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogPostDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+      tags:
+      - Blog
+      operationId: getV1BlogBySlug
+      x-operation-id-source: derived
+components:
+  parameters:
+    limit:
+      name: limit
+      in: query
+      description: 'Max records to return (default 20). A non-numeric, non-integer, or non-positive value (e.g. `abc`, `1.5`, `0`, `-1`) returns a 400 `invalid_parameter` error rather than silently falling back to the default. A value above the documented maximum (100) is the one exception: it is NOT an error, it is silently clamped to 100 — see /docs#pagination for the full rationale for that one intentional exception.
+
+        '
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+    slug:
+      name: slug
+      in: path
+      required: true
+      schema:
+        type: string
+    offset:
+      name: offset
+      in: query
+      description: 'Records to skip (default 0). A non-numeric, non-integer, or negative value (e.g. `abc`, `1.5`, `-1`) returns a 400 `invalid_parameter` error rather than silently falling back to 0 — see /docs#pagination.
+
+        '
+      schema:
+        type: integer
+        default: 0
+  schemas:
+    Pagination:
+      type: object
+      properties:
+        limit:
+          type: integer
+        offset:
+          type: integer
+        total:
+          type: integer
+    BlogPost:
+      type: object
+      description: 'Deliberately minimal by design — no id, slug, type, or updated_at, unlike every other schema in this API. Never expand this shape without explicit approval.
+
+        '
+      properties:
+        title:
+          type: string
+        excerpt:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+          description: Always an array, even when the post has no tags (never null).
+        canonical_url:
+          type: string
+      example:
+        title: 'Mindfulness for Anxiety: A Complete Guide'
+        excerpt: A practical, evidence-informed guide to using mindfulness for anxiety.
+        tags:
+        - mindfulness
+        - anxiety
+        canonical_url: https://www.theholisticcare.com/blog/mindfulness-for-anxiety
+    BlogPostListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BlogPost'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        meta:
+          $ref: '#/components/schemas/Meta'
+    Meta:
+      type: object
+      description: Present on every successful response.
+      properties:
+        generated_at:
+          type: string
+          format: date-time
+        provider:
+          type: string
+          example: The Holistic Care
+        source:
+          type: string
+          example: https://www.theholisticcare.com
+    BlogPostDetailResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/BlogPost'
+        meta:
+          $ref: '#/components/schemas/Meta'
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Short, machine-readable identifier. See /docs#errors for the full list.
+              example: not_found
+            message:
+              type: string
+              description: Human-readable, safe to show a developer. Never a stack trace or internal detail.
+      example:
+        error:
+          code: not_found
+          message: No public blog post found for slug "example-slug".
+  responses:
+    RateLimited:
+      description: 'Too many requests from this IP recently (best-effort ~60 req/min; see /docs#rate-limiting for the honest limitations of this enforcement on serverless infrastructure).
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: 'No public record exists at that slug. A record that exists but is a draft, unpublished, or not opted into the API returns this exact same response as a slug that doesn''t exist at all — never a different error that would reveal a private record''s existence.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InvalidParameter:
+      description: 'A malformed `limit` or `offset` value (non-numeric, non-integer, a non-positive `limit`, or a negative `offset`) — see /docs#pagination. Every endpoint below that accepts `limit`/`offset` can return this.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

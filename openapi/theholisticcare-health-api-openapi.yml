@@ -6,7 +6,7 @@ info:
   contact:
     name: The Holistic Care
     url: https://www.theholisticcare.com
-    email: mohan@theholisticcare.com
+    email: info@theholisticcare.com
   license:
     name: MIT (code only — see LICENSING.md for content rights)
     url: https://github.com/mohanagc/thc-open-mindfulness-api/blob/main/LICENSE
@@ -18,12 +18,31 @@ tags:
 paths:
   /health:
     get:
+      summary: Service status
+      description: Not versioned under /v1 (a health check is deliberately outside the versioning contract). No rate limiting, no caching.
       responses:
         '200':
-          description: OK
+          description: Service is up.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
       tags:
       - Health
-      summary: Get health
-      x-summary-source: derived
       operationId: getHealth
       x-operation-id-source: derived
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - ok
+        version:
+          type: string
+          example: v1
+        time:
+          type: string
+          format: date-time

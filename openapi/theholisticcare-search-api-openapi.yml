@@ -6,7 +6,7 @@ info:
   contact:
     name: The Holistic Care
     url: https://www.theholisticcare.com
-    email: mohan@theholisticcare.com
+    email: info@theholisticcare.com
   license:
     name: MIT (code only — see LICENSING.md for content rights)
     url: https://github.com/mohanagc/thc-open-mindfulness-api/blob/main/LICENSE
@@ -18,17 +18,211 @@ tags:
 paths:
   /v1/search:
     get:
-      summary: Search resources
+      summary: Free-text search across every public resource family
+      description: Case-insensitive substring match over the same public metadata /v1/resources exposes (title, summary, category, tags) — never article bodies or private/premium content. Not built on Elasticsearch, Algolia, or embeddings; a simple in-memory match, documented as correct at current content volumes rather than overengineered for V1.
       parameters:
-      - in: query
-        name: q
+      - name: q
+        in: query
+        required: true
+        description: Search text. Required; a missing or empty (or whitespace-only) value returns 400.
         schema:
           type: string
-        description: Search query
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
       responses:
         '200':
-          description: Search results
+          description: A paginated list of matching normalized public resources.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceListResponse'
+        '400':
+          description: 'Missing or empty `q` parameter (`missing_query`), or a malformed `limit`/`offset` value (`invalid_parameter`) — see /docs#pagination.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimited'
       tags:
       - Search
       operationId: getV1Search
       x-operation-id-source: derived
+components:
+  parameters:
+    limit:
+      name: limit
+      in: query
+      description: 'Max records to return (default 20). A non-numeric, non-integer, or non-positive value (e.g. `abc`, `1.5`, `0`, `-1`) returns a 400 `invalid_parameter` error rather than silently falling back to the default. A value above the documented maximum (100) is the one exception: it is NOT an error, it is silently clamped to 100 — see /docs#pagination for the full rationale for that one intentional exception.
+
+        '
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+    offset:
+      name: offset
+      in: query
+      description: 'Records to skip (default 0). A non-numeric, non-integer, or negative value (e.g. `abc`, `1.5`, `-1`) returns a 400 `invalid_parameter` error rather than silently falling back to 0 — see /docs#pagination.
+
+        '
+      schema:
+        type: integer
+        default: 0
+  schemas:
+    Resource:
+      type: object
+      description: 'The common normalized shape used by /v1/resources and /v1/search across all 6 families. Fields not applicable to a given resource''s type are null rather than fabricated. `id` is populated for every resource, using each family''s existing stable public identifier where one already exists (mindfulness_game uses its `MG-*` api_id, guided_practice uses its `SL-*` track_id, panchavikas_* uses its `PV-*` id), or a deterministic `type:slug` pair otherwise (e.g. `blog:<slug>`, `research:<slug>`, `glossary:<slug>`) — never a raw Sanity `_id`. `slug` is populated for every type except panchavikas_pathway/panchavikas_download, which have no real slug field and are always null there. A blog-type resource still always has `category` set to null (unlike id/slug, which changed 2026-09-25 — see HANDOFF.md), matching the fact that blog posts have no equivalent taxonomy field exposed elsewhere in this API. Note this Resource shape (used only by /v1/resources and /v1/search) is intentionally richer than the dedicated /v1/blog endpoint''s own response, which still omits id/slug/type/updated_at entirely per Mohan''s original instruction for that endpoint specifically.
+
+        '
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        slug:
+          type:
+          - string
+          - 'null'
+        type:
+          type: string
+          enum:
+          - blog
+          - mindfulness_game
+          - guided_practice
+          - research
+          - glossary
+          - panchavikas_pathway
+          - panchavikas_download
+        summary:
+          type:
+          - string
+          - 'null'
+        category:
+          type:
+          - string
+          - 'null'
+        tags:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+        audiences:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+        age_min:
+          type:
+          - integer
+          - 'null'
+        age_max:
+          type:
+          - integer
+          - 'null'
+        duration_minutes:
+          type:
+          - integer
+          - 'null'
+        skills:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+        access:
+          type:
+          - string
+          - 'null'
+          description: e.g. "free". Never "paid" — no paid content is ever exposed by this API.
+        source_url:
+          type: string
+        updated_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+      example:
+        id: MG-001
+        title: Breathing Buddy
+        slug: breathing-buddy
+        type: mindfulness_game
+        summary: A gentle breathing pacer for young children.
+        category: Breathing
+        tags:
+        - breathing
+        - calm
+        - kids
+        audiences:
+        - children
+        age_min: 5
+        age_max: 12
+        duration_minutes: 5
+        skills:
+        - breathwork
+        access: free
+        source_url: https://www.theholisticcare.com/games/breathing-buddy.html
+        updated_at: '2026-09-24T00:00:00.000Z'
+    Pagination:
+      type: object
+      properties:
+        limit:
+          type: integer
+        offset:
+          type: integer
+        total:
+          type: integer
+    Meta:
+      type: object
+      description: Present on every successful response.
+      properties:
+        generated_at:
+          type: string
+          format: date-time
+        provider:
+          type: string
+          example: The Holistic Care
+        source:
+          type: string
+          example: https://www.theholisticcare.com
+    ResourceListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Resource'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        meta:
+          $ref: '#/components/schemas/Meta'
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Short, machine-readable identifier. See /docs#errors for the full list.
+              example: not_found
+            message:
+              type: string
+              description: Human-readable, safe to show a developer. Never a stack trace or internal detail.
+      example:
+        error:
+          code: not_found
+          message: No public blog post found for slug "example-slug".
+  responses:
+    RateLimited:
+      description: 'Too many requests from this IP recently (best-effort ~60 req/min; see /docs#rate-limiting for the honest limitations of this enforcement on serverless infrastructure).
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

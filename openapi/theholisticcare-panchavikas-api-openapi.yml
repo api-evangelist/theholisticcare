@@ -1,0 +1,113 @@
+openapi: 3.2.0
+info:
+  title: THC Open Mindfulness Resources Panchavikas API
+  version: 1.0.0
+  description: A free, public, read-only REST API exposing The Holistic Care's open mindfulness resources — research citations (whitepapers), a plain-language glossary, 16 free mindfulness games, 111 free guided-audio practices, blog post excerpts, and the public PanchaVikas early-years framework — as structured JSON.
+  contact:
+    name: The Holistic Care
+    url: https://www.theholisticcare.com
+    email: info@theholisticcare.com
+  license:
+    name: MIT (code only — see LICENSING.md for content rights)
+    url: https://github.com/mohanagc/thc-open-mindfulness-api/blob/main/LICENSE
+servers:
+- url: https://api.theholisticcare.com
+  description: Production (only environment currently deployed)
+tags:
+- name: Panchavikas
+paths:
+  /v1/panchavikas/resources:
+    get:
+      summary: List public PanchaVikas pathways and the framework guide download
+      description: The 5 public pathway summaries plus the framework guide PDF download. Never exposes FAQs, school pricing tiers, or curriculum/session-plan content. Not paginated (6 fixed items).
+      responses:
+        '200':
+          description: The 5 pathways plus the guide download resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PanchaVikasResourceListResponse'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+      tags:
+      - Panchavikas
+      operationId: getV1PanchavikasResources
+      x-operation-id-source: derived
+components:
+  schemas:
+    PanchaVikasResourceListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PanchaVikasResource'
+        meta:
+          $ref: '#/components/schemas/Meta'
+    PanchaVikasResource:
+      type: object
+      description: 'Either a pathway summary (type panchavikas_pathway) or the framework guide download (type panchavikas_download, which additionally has download_url).
+
+        '
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+          - panchavikas_pathway
+          - panchavikas_download
+        title:
+          type: string
+        summary:
+          type: string
+        download_url:
+          type: string
+          description: Present only on the panchavikas_download item.
+        source_url:
+          type: string
+      example:
+        id: PV-pathway-prithvi
+        type: panchavikas_pathway
+        title: Prithvi
+        summary: 'Ground & Grow: Body, senses, stability, health, independence and nature connection.'
+        source_url: https://www.theholisticcare.com/panchavikas
+    Meta:
+      type: object
+      description: Present on every successful response.
+      properties:
+        generated_at:
+          type: string
+          format: date-time
+        provider:
+          type: string
+          example: The Holistic Care
+        source:
+          type: string
+          example: https://www.theholisticcare.com
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Short, machine-readable identifier. See /docs#errors for the full list.
+              example: not_found
+            message:
+              type: string
+              description: Human-readable, safe to show a developer. Never a stack trace or internal detail.
+      example:
+        error:
+          code: not_found
+          message: No public blog post found for slug "example-slug".
+  responses:
+    RateLimited:
+      description: 'Too many requests from this IP recently (best-effort ~60 req/min; see /docs#rate-limiting for the honest limitations of this enforcement on serverless infrastructure).
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
