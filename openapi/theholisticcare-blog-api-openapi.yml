@@ -202,3 +202,9 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+x-provenance:
+  method: harvested
+  publisher: The Holistic Care — THC Open Mindfulness API
+  source: https://api.theholisticcare.com/openapi/openapi.yaml
+  note: split by refine-openapis from the provider's own published document, verified by fetch (openapi/_original/*.fetch.json);
+    stamped by stamp-openapi-provenance.py (roadmap#793)
